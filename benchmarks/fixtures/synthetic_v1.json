@@ -1,0 +1,383 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "clear",
+      "scenario": "Clearly relevant versus irrelevant",
+      "query": "Which facts answer this synthetic question?",
+      "token_budget": 8,
+      "segments": [
+        {
+          "id": "answer",
+          "text": "Paris.",
+          "source_id": "synthetic-source-answer",
+          "relevance": 3,
+          "predicted_score": 0.9,
+          "pinned": false,
+          "critical": false
+        },
+        {
+          "id": "noise",
+          "text": "Noise.",
+          "source_id": "synthetic-source-noise",
+          "relevance": 0,
+          "predicted_score": 0.1,
+          "pinned": false,
+          "critical": false
+        }
+      ]
+    },
+    {
+      "id": "graded",
+      "scenario": "Several relevance grades",
+      "query": "Which facts answer this synthetic question?",
+      "token_budget": 11,
+      "segments": [
+        {
+          "id": "a",
+          "text": "A=1.",
+          "source_id": "synthetic-source-a",
+          "relevance": 3,
+          "predicted_score": 0.9,
+          "pinned": false,
+          "critical": false
+        },
+        {
+          "id": "b",
+          "text": "B=2.",
+          "source_id": "synthetic-source-b",
+          "relevance": 2,
+          "predicted_score": 0.8,
+          "pinned": false,
+          "critical": false
+        },
+        {
+          "id": "c",
+          "text": "Note",
+          "source_id": "synthetic-source-c",
+          "relevance": 1,
+          "predicted_score": 0.2,
+          "pinned": false,
+          "critical": false
+        }
+      ]
+    },
+    {
+      "id": "low_rank_relevant",
+      "scenario": "Relevant information ranked incorrectly",
+      "query": "Which facts answer this synthetic question?",
+      "token_budget": 9,
+      "segments": [
+        {
+          "id": "answer",
+          "text": "Answer.",
+          "source_id": "synthetic-source-answer",
+          "relevance": 3,
+          "predicted_score": 0.1,
+          "pinned": false,
+          "critical": false
+        },
+        {
+          "id": "aside",
+          "text": "Aside.",
+          "source_id": "synthetic-source-aside",
+          "relevance": 0,
+          "predicted_score": 0.9,
+          "pinned": false,
+          "critical": false
+        }
+      ]
+    },
+    {
+      "id": "size_competition",
+      "scenario": "Large relevant unit competes with two smaller relevant units",
+      "query": "Which facts answer this synthetic question?",
+      "token_budget": 13,
+      "segments": [
+        {
+          "id": "large",
+          "text": "Long answer",
+          "source_id": "synthetic-source-large",
+          "relevance": 3,
+          "predicted_score": 0.1,
+          "pinned": false,
+          "critical": false
+        },
+        {
+          "id": "east",
+          "text": "East.",
+          "source_id": "synthetic-source-east",
+          "relevance": 2,
+          "predicted_score": 0.9,
+          "pinned": false,
+          "critical": false
+        },
+        {
+          "id": "gate",
+          "text": "Gate.",
+          "source_id": "synthetic-source-gate",
+          "relevance": 2,
+          "predicted_score": 0.8,
+          "pinned": false,
+          "critical": false
+        }
+      ]
+    },
+    {
+      "id": "pinned",
+      "scenario": "Pinned instructions precede selected evidence",
+      "query": "Which facts answer this synthetic question?",
+      "token_budget": 14,
+      "segments": [
+        {
+          "id": "pin",
+          "text": "Rules.",
+          "source_id": "synthetic-source-pin",
+          "relevance": 0,
+          "predicted_score": 0.1,
+          "pinned": true,
+          "critical": false
+        },
+        {
+          "id": "fact",
+          "text": "Fact.",
+          "source_id": "synthetic-source-fact",
+          "relevance": 3,
+          "predicted_score": 0.9,
+          "pinned": false,
+          "critical": false
+        },
+        {
+          "id": "junk",
+          "text": "Junk.",
+          "source_id": "synthetic-source-junk",
+          "relevance": 0,
+          "predicted_score": 0.2,
+          "pinned": false,
+          "critical": false
+        }
+      ]
+    },
+    {
+      "id": "critical_low_rank",
+      "scenario": "Critical evidence incorrectly deprioritized",
+      "query": "Which facts answer this synthetic question?",
+      "token_budget": 9,
+      "segments": [
+        {
+          "id": "answer",
+          "text": "Answer.",
+          "source_id": "synthetic-source-answer",
+          "relevance": 4,
+          "predicted_score": 0.1,
+          "pinned": false,
+          "critical": true
+        },
+        {
+          "id": "aside",
+          "text": "Aside.",
+          "source_id": "synthetic-source-aside",
+          "relevance": 0,
+          "predicted_score": 0.9,
+          "pinned": false,
+          "critical": false
+        }
+      ]
+    },
+    {
+      "id": "ties",
+      "scenario": "Equal scores break ties in source order",
+      "query": "Which facts answer this synthetic question?",
+      "token_budget": 6,
+      "segments": [
+        {
+          "id": "old",
+          "text": "Old.",
+          "source_id": "synthetic-source-old",
+          "relevance": 0,
+          "predicted_score": 1,
+          "pinned": false,
+          "critical": false
+        },
+        {
+          "id": "new",
+          "text": "New.",
+          "source_id": "synthetic-source-new",
+          "relevance": 3,
+          "predicted_score": 1,
+          "pinned": false,
+          "critical": false
+        }
+      ]
+    },
+    {
+      "id": "render_overhead",
+      "scenario": "Framing and separator change budget admission",
+      "query": "Which facts answer this synthetic question?",
+      "token_budget": 5,
+      "segments": [
+        {
+          "id": "a",
+          "text": "AA",
+          "source_id": "synthetic-source-a",
+          "relevance": 1,
+          "predicted_score": 0.9,
+          "pinned": false,
+          "critical": false
+        },
+        {
+          "id": "b",
+          "text": "BB",
+          "source_id": "synthetic-source-b",
+          "relevance": 1,
+          "predicted_score": 0.8,
+          "pinned": false,
+          "critical": false
+        }
+      ]
+    },
+    {
+      "id": "within_budget",
+      "scenario": "Full context already fits",
+      "query": "Which facts answer this synthetic question?",
+      "token_budget": 30,
+      "segments": [
+        {
+          "id": "fact",
+          "text": "Fact.",
+          "source_id": "synthetic-source-fact",
+          "relevance": 3,
+          "predicted_score": 0.9,
+          "pinned": false,
+          "critical": false
+        },
+        {
+          "id": "ref",
+          "text": "Ref.",
+          "source_id": "synthetic-source-ref",
+          "relevance": 1,
+          "predicted_score": 0.5,
+          "pinned": false,
+          "critical": false
+        }
+      ]
+    },
+    {
+      "id": "pinned_overflow",
+      "scenario": "Pinned content alone exceeds budget",
+      "query": "Which facts answer this synthetic question?",
+      "token_budget": 8,
+      "segments": [
+        {
+          "id": "pin",
+          "text": "Keep this policy.",
+          "source_id": "synthetic-source-pin",
+          "relevance": 1,
+          "predicted_score": 0.1,
+          "pinned": true,
+          "critical": true
+        },
+        {
+          "id": "answer",
+          "text": "Answer.",
+          "source_id": "synthetic-source-answer",
+          "relevance": 3,
+          "predicted_score": 0.9,
+          "pinned": false,
+          "critical": false
+        }
+      ]
+    },
+    {
+      "id": "insufficient_savings",
+      "scenario": "Candidate savings below explicit fixture policy",
+      "query": "Which facts answer this synthetic question?",
+      "token_budget": 7,
+      "segments": [
+        {
+          "id": "fact",
+          "text": "Fact.",
+          "source_id": "synthetic-source-fact",
+          "relevance": 3,
+          "predicted_score": 0.9,
+          "pinned": false,
+          "critical": false
+        },
+        {
+          "id": "x",
+          "text": "x",
+          "source_id": "synthetic-source-x",
+          "relevance": 0,
+          "predicted_score": 0.1,
+          "pinned": false,
+          "critical": false
+        }
+      ],
+      "policy": {
+        "min_tokens_saved": 3
+      }
+    },
+    {
+      "id": "empty",
+      "scenario": "Empty context gives unavailable denominators",
+      "query": "Which facts answer this synthetic question?",
+      "token_budget": 1,
+      "segments": []
+    },
+    {
+      "id": "no_relevance",
+      "scenario": "No graded evidence or critical segments",
+      "query": "Which facts answer this synthetic question?",
+      "token_budget": 4,
+      "segments": [
+        {
+          "id": "a",
+          "text": "A.",
+          "source_id": "synthetic-source-a",
+          "relevance": 0,
+          "predicted_score": 0.9,
+          "pinned": false,
+          "critical": false
+        },
+        {
+          "id": "b",
+          "text": "B.",
+          "source_id": "synthetic-source-b",
+          "relevance": 0,
+          "predicted_score": 0.8,
+          "pinned": false,
+          "critical": false
+        }
+      ]
+    },
+    {
+      "id": "disabled",
+      "scenario": "Explicit disabled-policy bypass",
+      "query": "Which facts answer this synthetic question?",
+      "token_budget": 4,
+      "segments": [
+        {
+          "id": "a",
+          "text": "Fact.",
+          "source_id": "synthetic-source-a",
+          "relevance": 3,
+          "predicted_score": 0.9,
+          "pinned": false,
+          "critical": false
+        },
+        {
+          "id": "b",
+          "text": "Aside.",
+          "source_id": "synthetic-source-b",
+          "relevance": 0,
+          "predicted_score": 0.1,
+          "pinned": false,
+          "critical": false
+        }
+      ],
+      "policy": {
+        "enabled": false
+      }
+    }
+  ]
+}
