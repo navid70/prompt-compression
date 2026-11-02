@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from math import isfinite
-from collections.abc import Iterable
 
 
 @dataclass(frozen=True, slots=True)
