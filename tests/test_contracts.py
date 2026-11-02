@@ -26,7 +26,11 @@ def test_request_normalizes_segments_and_preserves_order() -> None:
     first = ContextSegment(id="first", text="A")
     second = ContextSegment(id="second", text="B")
 
-    request = OptimizationRequest(query="question", segments=[first, second], token_budget=100)  # type: ignore[arg-type]
+    request = OptimizationRequest(
+        query="question",
+        segments=[first, second],  # type: ignore[arg-type]
+        token_budget=100,
+    )
 
     assert request.segments == (first, second)
     assert tuple(segment.id for segment in request.segments) == ('first', 'second')
