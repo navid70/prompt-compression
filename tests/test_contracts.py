@@ -33,7 +33,7 @@ def test_request_normalizes_segments_and_preserves_order() -> None:
     )
 
     assert request.segments == (first, second)
-    assert tuple(segment.id for segment in request.segments) == ('first', 'second')
+    assert tuple(segment.id for segment in request.segments) == ("first", "second")
 
 
 def test_request_rejects_duplicate_segment_ids() -> None:
@@ -41,18 +41,18 @@ def test_request_rejects_duplicate_segment_ids() -> None:
     second = ContextSegment(id="duplicate", text="B")
 
     with pytest.raises(ValueError, match="unique"):
-        OptimizationRequest(query='question', segments=(first, second), token_budget=100)
+        OptimizationRequest(query="question", segments=(first, second), token_budget=100)
 
 
-@pytest.mark.parametrize('budget', [0, -1])
+@pytest.mark.parametrize("budget", [0, -1])
 def test_request_requires_positive_budget(budget: int) -> None:
-    with pytest.raises(ValueError, match='greater than zero'):
-        OptimizationRequest(query='question', segments=(), token_budget=budget)
+    with pytest.raises(ValueError, match="greater than zero"):
+        OptimizationRequest(query="question", segments=(), token_budget=budget)
 
 
 def test_request_rejects_boolean_budget() -> None:
-    with pytest.raises(TypeError, match='integer'):
-        OptimizationRequest(query='question', segments=(), token_budget=True)
+    with pytest.raises(TypeError, match="integer"):
+        OptimizationRequest(query="question", segments=(), token_budget=True)
 
 
 def test_policy_is_disabled_by_default() -> None:
@@ -60,10 +60,10 @@ def test_policy_is_disabled_by_default() -> None:
 
 
 def test_policy_rejects_invalid_reduction_ratio() -> None:
-    with pytest.raises(ValueError, match='min_reduction_ratio'):
+    with pytest.raises(ValueError, match="min_reduction_ratio"):
         OptimizationPolicy(min_reduction_ratio=1.0)
 
 
 def test_policy_rejects_empty_strategy_names() -> None:
-    with pytest.raises(ValueError, match='non-empty'):
-        OptimizationPolicy(allowed_strategies=('bm25', ' '))
+    with pytest.raises(ValueError, match="non-empty"):
+        OptimizationPolicy(allowed_strategies=("bm25", " "))
