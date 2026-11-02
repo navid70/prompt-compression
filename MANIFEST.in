@@ -1,0 +1,3 @@
+include benchmarks/*.py
+include benchmarks/fixtures/synthetic_v1.json
+include scripts/smoke_install.py

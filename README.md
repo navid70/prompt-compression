@@ -32,12 +32,19 @@ segments, scores the remaining segments (higher is better, ties follow input ord
 and checks the fully rendered token count after each attempted addition. Retained
 segments keep their original text, IDs, provenance, and order. Policy input-size and
 savings thresholds still apply; a greedy selection need not maximize budget usage.
+Enabled requests with more than 256 segments bypass before dependency calls with
+`segment_limit_exceeded`. Configure `max_segments` after host profiling; `None`
+removes the cap. This bounds candidate work, not host dependency duration.
 
 Only use `result.context` as optimized context when `result.applied` is true. Every
 bypass preserves all original IDs and reports a `reason_code`; it may exceed the
 budget. `context=None` means rendering was skipped or failed: reuse the original
 host request. Token counts are `None` when unavailable. Dependency exceptions are
 contained without logging or returning their potentially sensitive messages.
+Public constructors validate field types and ranges, raising `TypeError` or
+`ValueError` before optimization. See [host integration](docs/integration.md) for
+validation fallback, exact rendering, shadow rollout and the kill switch, and the
+[readiness audit](docs/production-readiness-audit.md) for evidence and open gates.
 
 ## Development
 
@@ -51,6 +58,7 @@ pytest
 ruff check .
 ruff format --check .
 mypy src
+python -m build
 ```
 
 ## Integration boundary
@@ -156,3 +164,18 @@ request renderer, a real scorer, representative permission-cleared held-out data
 downstream answer-quality evaluation, and cache-aware pricing and CPU/invoice
 costs. No such gate passes merely because this offline harness runs successfully;
 optimization remains disabled by default.
+
+For a synthetic scaling profile with p50/p95/p99, serial throughput and separately
+measured Python allocation peaks:
+
+```bash
+python -m benchmarks.scaling --output benchmarks/results/scaling.json
+```
+
+It compares 8,000/32,000 code-point contexts across segment counts, including the
+segment-limit bypass and an explicit uncapped diagnostic. These are synthetic
+language units, not model tokens or a production latency guarantee. Dataset and
+evaluation tooling stays outside the runtime package; Hugging Face and Parquet
+tools, when needed, are optional. Keep private records in an external cache and
+credentials in ignored local configuration. Metis data use in this project is
+limited to the authorized Rahnama College educational benchmark scope.

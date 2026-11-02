@@ -41,3 +41,17 @@ jobs:
 
       - name: Test
         run: pytest
+
+      - name: Build wheel and source distribution
+        run: python -m build
+
+      - name: Install and exercise artifacts outside the source tree
+        shell: bash
+        run: |
+          for artifact in dist/*.whl dist/*.tar.gz; do
+            python -m venv "$RUNNER_TEMP/artifact-env"
+            "$RUNNER_TEMP/artifact-env/bin/python" -m pip install "$artifact"
+            (cd "$RUNNER_TEMP" && "$RUNNER_TEMP/artifact-env/bin/python" -I "$GITHUB_WORKSPACE/scripts/smoke_install.py")
+            "$RUNNER_TEMP/artifact-env/bin/python" -m pip check
+            rm -rf "$RUNNER_TEMP/artifact-env"
+          done

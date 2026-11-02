@@ -73,6 +73,8 @@ def optimize_context(
             return bypass("strategy_not_allowed")
         if not request.segments:
             return bypass("empty_input")
+        if policy.max_segments is not None and len(request.segments) > policy.max_segments:
+            return bypass("segment_limit_exceeded")
 
         original_context = render(request.segments)
         original_tokens = count(original_context)

@@ -32,4 +32,8 @@ htmlcov/
 # Local benchmark artifacts
 /benchmarks/data/
 /benchmarks/results/
+# Dataset caches must remain local; prefer HF_HOME outside this checkout.
+/.cache/
+/data/
+/hf_cache/
 *.zip

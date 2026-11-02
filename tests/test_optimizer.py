@@ -1,4 +1,5 @@
 from collections.abc import Sequence
+from dataclasses import replace
 
 import pytest
 
@@ -319,3 +320,129 @@ def test_empty_input_skips_dependencies(enabled_policy: OptimizationPolicy) -> N
     assert result.reason_code == "empty_input"
     assert result.context is None
     assert result.selected_segment_ids == ()
+
+
+def test_default_segment_limit_fails_open_before_dependencies(enabled_policy):
+    segments = tuple(ContextSegment(str(i), "source", pinned=i == 0) for i in range(257))
+    request = OptimizationRequest("q", segments, 1)
+    dependency = UnexpectedDependency()
+    result = optimize_context(
+        request,
+        policy=enabled_policy,
+        renderer=dependency,
+        token_counter=dependency,
+        scorer=dependency,
+    )
+    assert not result.applied
+    assert result.reason_code == "segment_limit_exceeded"
+    assert result.selected_segment_ids == tuple(str(i) for i in range(257))
+    assert result.context is None
+    assert result.original_tokens is result.optimized_tokens is None
+
+
+@pytest.mark.parametrize(("limit", "applied"), [(1, False), (2, True), (None, True)])
+def test_segment_limit_is_configurable_and_inclusive(enabled_policy, limit, applied):
+    request = OptimizationRequest("q", (ContextSegment("a", "A"), ContextSegment("b", "B")), 3)
+    result = optimize_context(
+        request,
+        policy=replace(enabled_policy, max_segments=limit),
+        renderer=FramedRenderer(),
+        token_counter=CharacterCounter(),
+        scorer=EqualScorer(),
+    )
+    assert result.applied is applied
+    assert result.reason_code == ("optimized" if applied else "segment_limit_exceeded")
+    assert result.selected_segment_ids == (("a",) if applied else ("a", "b"))
+
+
+@pytest.mark.parametrize("value", [True, -1, 1.5, "1", None])
+@pytest.mark.parametrize("candidate_failure", [False, True])
+def test_invalid_tokenizer_outputs_fail_open(value, candidate_failure, enabled_policy):
+    class Counter(CharacterCounter):
+        def count(self, text, /):
+            if not candidate_failure or text == "[A]":
+                return value
+            return super().count(text)
+
+    request = OptimizationRequest("q", (ContextSegment("a", "A"), ContextSegment("b", "B")), 3)
+    result = optimize_context(
+        request,
+        policy=enabled_policy,
+        renderer=FramedRenderer(),
+        token_counter=Counter(),
+        scorer=EqualScorer(),
+    )
+    assert not result.applied
+    assert result.reason_code == "tokenizer_error"
+    assert result.context == "[A|B]"
+    assert result.selected_segment_ids == ("a", "b")
+    assert result.original_tokens == result.optimized_tokens == (5 if candidate_failure else None)
+
+
+@pytest.mark.parametrize("value", [None, b"source", ["source"]])
+@pytest.mark.parametrize("candidate_failure", [False, True])
+def test_invalid_renderer_outputs_fail_open(value, candidate_failure, enabled_policy):
+    class Renderer(FramedRenderer):
+        def render(self, segments, /):
+            if not candidate_failure or len(segments) == 1:
+                return value
+            return super().render(segments)
+
+    request = OptimizationRequest("q", (ContextSegment("a", "A"), ContextSegment("b", "B")), 3)
+    result = optimize_context(
+        request,
+        policy=enabled_policy,
+        renderer=Renderer(),
+        token_counter=CharacterCounter(),
+        scorer=EqualScorer(),
+    )
+    assert not result.applied
+    assert result.reason_code == "renderer_error"
+    assert result.context == ("[A|B]" if candidate_failure else None)
+    assert result.selected_segment_ids == ("a", "b")
+
+
+def test_seeded_invariants_with_unicode_code_tables_and_nonlinear_counts(enabled_policy):
+    import random
+
+    rng = random.Random(20261102)
+    texts = ("", "فارسی\n", "東京🙂", "e\u0301", "a\x00b", "```py\nx = 1\n```", "|A|B|\n|1|2|")
+
+    class BoundaryCounter:
+        def count(self, text, /):
+            # Synthetic language with a two-character merge, not model-token estimation.
+            return len(text.replace("||", "@"))
+
+    for _ in range(150):
+        segments = tuple(
+            ContextSegment(
+                str(i), rng.choice(texts), source_id=f"doc-{i}", pinned=rng.choice((True, False))
+            )
+            for i in range(rng.randint(1, 8))
+        )
+        before = tuple((s.id, s.text, s.source_id, s.pinned) for s in segments)
+        request = OptimizationRequest("negation: not 2026", segments, rng.randint(1, 50))
+        results = [
+            optimize_context(
+                request,
+                policy=enabled_policy,
+                renderer=FramedRenderer(),
+                token_counter=BoundaryCounter(),
+                scorer=EqualScorer(),
+            )
+            for _ in range(2)
+        ]
+        assert replace(results[0], latency_ms=0) == replace(results[1], latency_ms=0)
+        result = results[0]
+        selected = tuple(s for s in segments if s.id in result.selected_segment_ids)
+        assert result.selected_segment_ids == tuple(s.id for s in selected)
+        assert all(s.id in result.selected_segment_ids for s in segments if s.pinned)
+        assert before == tuple((s.id, s.text, s.source_id, s.pinned) for s in segments)
+        assert request.segments is segments
+        if result.applied:
+            assert result.context == FramedRenderer().render(selected)
+            assert result.optimized_tokens == BoundaryCounter().count(result.context)
+            assert result.optimized_tokens <= request.token_budget
+        else:
+            assert result.selected_segment_ids == tuple(s.id for s in segments)
+            assert result.context in (None, FramedRenderer().render(segments))
