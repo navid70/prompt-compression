@@ -6,6 +6,7 @@ from context_optimizer.contracts import (
     OptimizationRequest,
     OptimizationResult,
 )
+from context_optimizer.optimizer import optimize_context
 from context_optimizer.protocols import ContextRenderer, SegmentScorer, TokenCounter
 
 __all__ = [
@@ -16,4 +17,5 @@ __all__ = [
     "OptimizationResult",
     "SegmentScorer",
     "TokenCounter",
+    "optimize_context",
 ]

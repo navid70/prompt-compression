@@ -74,9 +74,9 @@ class OptimizationPolicy:
 
 @dataclass(frozen=True, slots=True)
 class OptimizationResult:
-    """Observable outcome returned to the host application."""
+    """Observable outcome; context=None tells the host to reuse its original request."""
 
-    context: str
+    context: str | None
     selected_segment_ids: tuple[str, ...]
     original_tokens: int | None
     optimized_tokens: int | None
