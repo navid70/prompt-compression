@@ -143,7 +143,8 @@ Keep the implementation small and dependency-light.
    - Reserves pinned segments first.
    - Adds remaining segments within the exact budget using stable tie-breaking.
    - Returns retained segments in original source order, not score order.
-   - Never silently exceeds the supplied token budget.
+   - If pinned content alone exceeds the budget, it does not discard pinned content: it returns the original context unchanged with an explicit `pinned_content_exceeds_budget` bypass reason so the host can decide how to handle the over-budget request.
+   - An applied optimization never exceeds the supplied token budget.
 
 6. **Policy and fallback layer**
    - Bypasses small inputs, empty queries, unsupported content, unavailable tokenizers, invalid budgets, low expected savings, and low-confidence cases.
@@ -199,7 +200,8 @@ The library reports token deltas, not dollar savings. The host calculates net ec
 
 - Fail open to the original context for every unexpected error.
 - Never remove caller-pinned segments.
-- Never exceed the exact token budget for the rendered output.
+- An applied optimization must never exceed the exact token budget for the rendered output.
+- A bypass may return the original context above budget; it must clearly signal the reason and leave higher-level handling to the host.
 - Preserve retained text exactly; no hallucinated or generated replacement text.
 - Preserve stable segment IDs, source IDs, and source order.
 - Treat retrieved text as untrusted data, not instructions to the optimizer.
@@ -240,7 +242,7 @@ These are proposed release gates, not claims about current performance. The thre
 ### Reliability gate
 
 - Deterministic results for identical inputs/configuration.
-- 100% budget compliance in property and fuzz tests.
+- 100% budget compliance for every applied optimization in property and fuzz tests; bypass cases are separately asserted to preserve the original input and emit a reason code.
 - Fail-open behavior verified for tokenizer, renderer, scorer, and malformed-input failures.
 - No raw prompt/context in logs or telemetry.
 - Supported Python versions and dependency constraints tested in CI.
@@ -266,7 +268,6 @@ Proposed minimal layout:
 prompt-compression/
 ├── README.md
 ├── pyproject.toml
-├── LICENSE
 ├── src/
 │   └── context_optimizer/
 │       ├── __init__.py
@@ -291,7 +292,7 @@ prompt-compression/
     └── operations.md
 ```
 
-The exact file split should follow actual implementation size; do not create empty abstraction layers. Keep benchmark tooling outside the runtime package.
+The exact file split should follow actual implementation size; do not create empty abstraction layers. Keep benchmark tooling outside the runtime package. Do not add a license file until the repository owner explicitly chooses a license; public visibility alone does not grant reuse rights.
 
 ### Runtime and dependency proposal
 
