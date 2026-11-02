@@ -46,7 +46,7 @@ class OptimizationRequest:
         segment_ids = [segment.id for segment in normalized_segments]
         if len(segment_ids) != len(set(segment_ids)):
             raise ValueError("segment ids must be unique within a request")
-        object.__setattr__(self, 'segments', normalized_segments)
+        object.__setattr__(self, "segments", normalized_segments)
 
 
 @dataclass(frozen=True, slots=True)
@@ -69,7 +69,7 @@ class OptimizationPolicy:
         normalized_strategies = tuple(self.allowed_strategies)
         if any(not strategy.strip() for strategy in normalized_strategies):
             raise ValueError("allowed strategy names must be non-empty")
-        object.__setattr__(self, 'allowed_strategies', normalized_strategies)
+        object.__setattr__(self, "allowed_strategies", normalized_strategies)
 
 
 @dataclass(frozen=True, slots=True)
@@ -92,4 +92,4 @@ class OptimizationResult:
             raise ValueError("optimized_tokens cannot be negative")
         if not isfinite(self.latency_ms) or self.latency_ms < 0:
             raise ValueError("latency_ms must be finite and non-negative")
-        object.__setattr__(self, 'selected_segment_ids', tuple(self.selected_segment_ids))
+        object.__setattr__(self, "selected_segment_ids", tuple(self.selected_segment_ids))
